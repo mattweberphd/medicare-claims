@@ -4,7 +4,7 @@ from shiny import reactive
 from shiny.express import input, ui
 from shinywidgets import render_widget
 
-from shared import nj_counties, nj_counties_json, reimb_amt_ip
+from shared import nj_counties, nj_counties_json, reimb_amt_ip, reimb_amt_ip_by_race, reimb_amt_ip_by_sex
 
 ui.page_opts(title="DeSynPUF dashboard", fillable=True)
 
@@ -69,6 +69,33 @@ with ui.layout_columns():
             fig.update_geos(fitbounds="locations")
 
             return fig
+
+with ui.layout_columns():
+    with ui.card(full_screen=True):
+        ui.card_header("Reimbursement by race")
+        @render_widget
+        def race_bar():
+
+            sorted = reimb_amt_ip_by_race.sort_values(input.var(), ascending=True)
+
+            race_bar = px.bar(
+                sorted, x=input.var(), y="Race/Ethnicity", orientation="h"
+            )
+            
+            return race_bar
+
+    with ui.card(full_screen=True):
+        ui.card_header("Reimbursement by sex")
+        @render_widget
+        def sex_bar():
+
+            sorted = reimb_amt_ip_by_sex.sort_values(input.var(), ascending=True)
+
+            sex_bar = px.bar(
+                sorted, x=input.var(), y="Sex", orientation="h"
+            )
+            
+            return sex_bar            
 
 # @reactive.calc
 # def filtered_df():

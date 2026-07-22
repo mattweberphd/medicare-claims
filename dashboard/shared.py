@@ -42,4 +42,5 @@ reimb_amt_op = nj.groupby("County Name")["MEDREIMB_OP"].sum().to_frame(name="MED
 
 nj_counties_json = json.load(open("../data/NJ_Counties_3857_3761882870795826402.geojson", "r"))
 
-#import pdb; pdb.set_trace()
+reimb_amt_ip_by_race = nj.groupby("Race/Ethnicity")["MEDREIMB_IP"].sum().to_frame(name="MEDREIMB_IP").reset_index()
+reimb_amt_ip_by_sex = nj.groupby("Sex")["MEDREIMB_IP"].sum().to_frame(name="MEDREIMB_IP").reset_index()
