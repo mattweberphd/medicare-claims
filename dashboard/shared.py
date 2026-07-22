@@ -1,14 +1,11 @@
-from pathlib import Path
-
-# import configparser
-# import datetime as dt
 import geopandas as gpd
-
-# import matplotlib.pyplot as plt
+import json
 import pandas as pd
 
+from pathlib import Path
+
+# Keep this for when we unf*** I/O
 app_dir = Path(__file__).parent
-# df = pd.read_csv(app_dir / "penguins.csv")
 
 bsf = pd.read_csv("../data/DE1_0_2008_Beneficiary_Summary_File_Sample_1.csv")
 
@@ -38,3 +35,11 @@ reimb_amt_op = nj.groupby("County Name")["MEDREIMB_OP"].sum()
 nj_counties = nj_counties.join(reimb_amt_ip, on="COUNTY_LAB").join(
     reimb_amt_op, on="COUNTY_LAB"
 )
+
+# this isn't great, do the processing once
+reimb_amt_ip = nj.groupby("County Name")["MEDREIMB_IP"].sum().to_frame(name="MEDREIMB_IP").reset_index()
+reimb_amt_op = nj.groupby("County Name")["MEDREIMB_OP"].sum().to_frame(name="MEDREIMB_OP").reset_index()
+
+nj_counties_json = json.load(open("../data/NJ_Counties_3857_3761882870795826402.geojson", "r"))
+
+#import pdb; pdb.set_trace()
