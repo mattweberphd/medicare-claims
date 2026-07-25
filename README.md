@@ -10,6 +10,7 @@ Data should go in a directory called "data" on the top level. The dashboard also
 * Ratios:
     * Looking at each of inpatient, outpatient, carrier: What's the share of Medicare vs. beneficiary vs. primary payer responsibility? (3 pie charts I think, or area charts or whatever.)
     * Should be filterable by demos and county. So we need one df aggregated by race, sex, and county, with all 9 variables, [MEDREIMB, BENRES, PPPYMT] x [IP, OP, CAR].
+* Frequency and co-occurrence of condition indicators
 * Incorporate all data
     * Improve I/O, everything's hard-coded now
 * Improve install instructions
