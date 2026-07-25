@@ -44,3 +44,53 @@ nj_counties_json = json.load(open("../data/NJ_Counties_3857_3761882870795826402.
 
 reimb_amt_ip_by_race = nj.groupby("Race/Ethnicity")["MEDREIMB_IP"].sum().to_frame(name="MEDREIMB_IP").reset_index()
 reimb_amt_ip_by_sex = nj.groupby("Sex")["MEDREIMB_IP"].sum().to_frame(name="MEDREIMB_IP").reset_index()
+
+# Reimbursement by responsibility (Medicare reimbursement, beneficiary, payer) and type of care
+# (inpatient, outpatient, carrier (?))
+# Create it aggregated by all relevant groups -- we'll aggregate it further on the app end.
+# TODO: move to config
+groups = ["County Name", "Race/Ethnicity", "Sex"]
+fields = [
+    "MEDREIMB_IP",
+    "MEDREIMB_OP",
+    "MEDREIMB_CAR",
+    "BENRES_IP",
+    "BENRES_OP",
+    "BENRES_CAR",
+    "PPPYMT_IP",
+    "PPPYMT_OP",
+    "PPPYMT_CAR"
+]
+responsibility = {
+    "MEDREIMB_IP": "Medicare",
+    "MEDREIMB_OP": "Medicare",
+    "MEDREIMP_CAR": "Medicare",
+    "BENRES_IP": "Beneficiary",
+    "BENRES_OP": "Beneficiary",
+    "BENRES_CAR": "Beneficiary",
+    "PPPYMT_IP": "Payer",
+    "PPPYMT_OP": "Payer",
+    "PPPYMT_CAR": "Payer"
+}
+care = {
+    "MEDREIMB_IP": "Inpatient",
+    "MEDREIMB_OP": "Outpatient",
+    "MEDREIMP_CAR": "Carrier",
+    "BENRES_IP": "Inpatient",
+    "BENRES_OP": "Outpatient",
+    "BENRES_CAR": "Carrier",
+    "PPPYMT_IP": "Inpatient",
+    "PPPYMT_OP": "Outpatient",
+    "PPPYMT_CAR": "Carrier"    
+}
+
+# Sum fields
+rxr = nj.groupby(groups)[fields].sum().reset_index()
+# Wide to long
+rxr = pd.melt(rxr, id_vars = groups)
+
+rxr["Responsibility"] = rxr["variable"].map(responsibility)
+rxr["Care Type"] = rxr["variable"].map(care)
+
+
+import pdb; pdb.set_trace()
