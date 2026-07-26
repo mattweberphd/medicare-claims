@@ -6,7 +6,7 @@ Data should go in a directory called "data" on the top level. The dashboard also
 
 ## TODO
 
-* Frequency and co-occurrence of condition indicators
+* Frequency and ~co-occurrence~ of condition indicators
 * Before anything with claims data, some basic QOL / proof of usefulness:
     * Figure out and implement filtering (e.g., by demographics -- I think by variable is not necessary, show everything?)
     * Testing? Some anyway
