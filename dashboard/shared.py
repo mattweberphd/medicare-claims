@@ -1,11 +1,18 @@
 import geopandas as gpd
 import json
 import pandas as pd
+import yaml
 
 from pathlib import Path
+from typing import Optional
 
 # Keep this for when we unf*** I/O
 app_dir = Path(__file__).parent
+
+with open("../config.yml", "r") as cfg:
+    config = yaml.safe_load(cfg)
+
+INDICATORS = config["default"]["BENE_INDICATORS"]
 
 bsf = pd.read_csv("../data/DE1_0_2008_Beneficiary_Summary_File_Sample_1.csv")
 
@@ -106,3 +113,22 @@ def create_responsibility_pie_df(df: pd.DataFrame, care_type: str) -> pd.DataFra
     df_["Pct"] = df_["Amount"] / df_["Amount"].sum()
 
     return df_
+
+def cooccurrence(
+    df: pd.DataFrame, 
+    columns: Optional[list[str]] = None, 
+    convert_pct_by: Optional[str] = None
+) -> pd.DataFrame:
+
+    cooccurrence = df[columns].T.dot(df[columns]) if columns else df.T.dot(df)
+
+    if convert_pct_by == "rows":
+        divide_by = cooccurrence.sum(axis=1)
+        cooccurrence = cooccurrence.div(divide_by).T
+    elif convert_pct_by == "columns":
+        divide_by = cooccurrence.sum()
+        cooccurrence = cooccurrence.div(divide_by)
+
+    return cooccurrence
+
+#import pdb; pdb.set_trace()

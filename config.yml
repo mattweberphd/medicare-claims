@@ -1,0 +1,13 @@
+default:
+    BENE_INDICATORS:
+    - SP_ALZHDMTA
+    - SP_CHF
+    - SP_CHRNKIDN
+    - SP_CNCR
+    - SP_COPD
+    - SP_DEPRESSN
+    - SP_DIABETES
+    - SP_ISCHMCHT
+    - SP_OSTEOPRS
+    - SP_RA_OA
+    - SP_STRKETIA
