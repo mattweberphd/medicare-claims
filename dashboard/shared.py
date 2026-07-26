@@ -49,6 +49,7 @@ reimb_amt_ip_by_sex = nj.groupby("Sex")["MEDREIMB_IP"].sum().to_frame(name="MEDR
 # (inpatient, outpatient, carrier (?))
 # Create it aggregated by all relevant groups -- we'll aggregate it further on the app end.
 # TODO: move to config
+# TODO: functionize for testing (also applicable to uh everything here)
 groups = ["County Name", "Race/Ethnicity", "Sex"]
 fields = [
     "MEDREIMB_IP",
@@ -91,6 +92,17 @@ rxr = pd.melt(rxr, id_vars = groups)
 
 rxr["Responsibility"] = rxr["variable"].map(responsibility)
 rxr["Care Type"] = rxr["variable"].map(care)
+rxr = rxr.rename(columns={"value": "Amount"})
 
+#import pdb; pdb.set_trace()
 
-import pdb; pdb.set_trace()
+def create_responsibility_pie_df(df: pd.DataFrame, care_type: str) -> pd.DataFrame:
+
+    df_ = df[df["Care Type"] == care_type]
+    df_ = df_[["Responsibility", "Care Type", "Amount"]]\
+            .groupby(["Responsibility", "Care Type"])\
+            .sum()\
+            .reset_index()
+    df_["Pct"] = df_["Amount"] / df_["Amount"].sum()
+
+    return df_

@@ -4,7 +4,8 @@ from shiny import reactive
 from shiny.express import input, ui
 from shinywidgets import render_widget
 
-from shared import nj_counties, nj_counties_json, reimb_amt_ip, reimb_amt_ip_by_race, reimb_amt_ip_by_sex
+from shared import nj_counties, nj_counties_json, reimb_amt_ip, reimb_amt_ip_by_race, \
+    reimb_amt_ip_by_sex, rxr, create_responsibility_pie_df
 
 ui.page_opts(title="DeSynPUF dashboard", fillable=True)
 
@@ -96,6 +97,41 @@ with ui.layout_columns():
             )
             
             return sex_bar            
+
+
+with ui.layout_columns():
+    with ui.card(full_screen=True):
+        ui.card_header("Responsibility by inpatient cost")
+
+        ip = create_responsibility_pie_df(rxr, "Inpatient")
+
+        @render_widget
+        def plot_ip_pie():
+            ip_pie = px.pie(ip, names="Responsibility", values="Amount")
+
+            return ip_pie
+
+    with ui.card(full_screen=True):
+        ui.card_header("Responsibility by outpatient cost")
+
+        op = create_responsibility_pie_df(rxr, "Outpatient")
+
+        @render_widget
+        def plot_op_pie():
+            op_pie = px.pie(op, names="Responsibility", values="Amount")
+
+            return op_pie
+
+    with ui.card(full_screen=True):
+        ui.card_header("Responsibility by carrier cost")
+
+        car_ = create_responsibility_pie_df(rxr, "Carrier")
+
+        @render_widget
+        def plot_car_pie():
+            car_pie = px.pie(car_, names="Responsibility", values="Amount")
+
+            return car_pie            
 
 # @reactive.calc
 # def filtered_df():
