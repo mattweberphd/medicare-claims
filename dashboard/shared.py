@@ -1,5 +1,6 @@
 import geopandas as gpd
 import json
+import numpy as np
 import pandas as pd
 import yaml
 
@@ -121,13 +122,13 @@ def cooccurrence(
 ) -> pd.DataFrame:
 
     cooccurrence = df[columns].T.dot(df[columns]) if columns else df.T.dot(df)
+    divide_by = pd.Series(np.diag(cooccurrence), index=cooccurrence.index)
+    normed = cooccurrence / divide_by
 
     if convert_pct_by == "rows":
-        divide_by = cooccurrence.sum(axis=1)
-        cooccurrence = cooccurrence.div(divide_by).T
+        cooccurrence = normed.T
     elif convert_pct_by == "columns":
-        divide_by = cooccurrence.sum()
-        cooccurrence = cooccurrence.div(divide_by)
+        cooccurrence = normed
 
     return cooccurrence
 

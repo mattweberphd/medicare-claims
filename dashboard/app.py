@@ -148,7 +148,7 @@ with ui.layout_columns():
             return hm
 
     with ui.card(full_screen=True):
-        ui.card_header("Raw cooccurrence of indicators")
+        ui.card_header("Cooccurrence of indicators (col | row)")
         @render_widget
         def cooccurrence_rows():
 
