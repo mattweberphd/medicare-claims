@@ -15,6 +15,7 @@ Data should go in a directory called "data" on the top level. The dashboard also
         * Improve I/O, everything's hard-coded now
     * Post to shinyapps.io (or posit.connect.cloud now?)
 * Claims data, other datasets
+    * How to make a multi-page dashboard?
 * Function to fetch data
 * Improve install instructions?
 * ~Data-dependent tooltips (e.g. county, bar)~
