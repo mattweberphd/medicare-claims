@@ -8,7 +8,7 @@ from shinywidgets import render_widget
 from shared import nj_counties, nj_counties_json, reimb_amt_ip, reimb_amt_ip_by_race, \
     reimb_amt_ip_by_sex, rxr, create_responsibility_pie_df, INDICATORS, cooccurrence, nj
 
-ui.page_opts(title="DeSynPUF dashboard", fillable=True)
+ui.page_opts(title="DeSynPUF dashboard", fillable=False, page_fluid=True)
 
 with ui.sidebar(title="Filter controls"):
     ui.input_selectize("var", "Select variable", choices=["MEDREIMB_IP", "MEDREIMB_OP"])
