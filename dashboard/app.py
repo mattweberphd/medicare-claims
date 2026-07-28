@@ -136,6 +136,23 @@ with ui.layout_columns():
 
 
 with ui.layout_columns():
+
+    with ui.card(full_screen=True):
+        ui.card_header("Frequency of indicators")
+        @render_widget
+        def indicator_frequency():
+            # oh jesus make this a function
+            indicators_bin = nj[INDICATORS].replace({2: 0})
+            indicators_count = indicators_bin.sum().reset_index().rename(columns={"index": "Indicator", 0: "count"})
+            sorted = indicators_count.sort_values("count", ascending=True)
+            sorted["percent"] = sorted["count"] / len(indicators_bin)
+
+            indicator_bar = px.bar(
+                sorted, x="count", y="Indicator", orientation="h", hover_data="percent"
+            )
+
+            return indicator_bar            
+
     with ui.card(full_screen=True):
         ui.card_header("Raw cooccurrence of indicators")
         @render_widget

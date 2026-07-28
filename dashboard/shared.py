@@ -132,4 +132,12 @@ def cooccurrence(
 
     return cooccurrence
 
+#def indicator_frequency():
+#indicators_bin = nj[INDICATORS].replace({2: 0})
+#indicators_count = indicators_bin.sum().reset_index().rename(columns={"index": "Indicator", 0: "count"})
+#indicators_count["percent"] = indicators_count["count"] / indicators_count["count"].sum()
+
+
+#sorted = nj_counties.sort_values(input.var(), ascending=True)
+
 #import pdb; pdb.set_trace()
