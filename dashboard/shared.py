@@ -20,6 +20,11 @@ bsf = pd.read_csv("../data/DE1_0_2008_Beneficiary_Summary_File_Sample_1.csv")
 counties = pd.read_csv("../mappings/counties.csv", index_col="BENE_COUNTY_CD")
 race = pd.read_csv("../mappings/race.csv", index_col="BENE_RACE_CD")
 sex = pd.read_csv("../mappings/sex.csv", index_col="BENE_SEX_IDENT_CD")
+
+COUNTIES = ["(All)"] + counties.index.sort_values(ascending=True).to_list()
+RACES = ["(All)"] + race.index.sort_values(ascending=True).to_list()
+SEXES = ["(All)"] + sex.index.sort_values(ascending=True).to_list()
+
 nj = (
     bsf.query("SP_STATE_CODE == 31")
     .join(counties, on="BENE_COUNTY_CD")
@@ -131,13 +136,5 @@ def cooccurrence(
         cooccurrence = normed
 
     return cooccurrence
-
-#def indicator_frequency():
-#indicators_bin = nj[INDICATORS].replace({2: 0})
-#indicators_count = indicators_bin.sum().reset_index().rename(columns={"index": "Indicator", 0: "count"})
-#indicators_count["percent"] = indicators_count["count"] / indicators_count["count"].sum()
-
-
-#sorted = nj_counties.sort_values(input.var(), ascending=True)
 
 #import pdb; pdb.set_trace()

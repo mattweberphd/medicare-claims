@@ -6,13 +6,16 @@ from shinywidgets import render_widget
 
 # TODO: organize
 from shared import nj_counties, nj_counties_json, reimb_amt_ip, reimb_amt_ip_by_race, \
-    reimb_amt_ip_by_sex, rxr, create_responsibility_pie_df, INDICATORS, cooccurrence, nj
+    reimb_amt_ip_by_sex, rxr, create_responsibility_pie_df, INDICATORS, cooccurrence, nj, \
+    COUNTIES, RACES, SEXES
 
 ui.page_opts(title="DeSynPUF dashboard", fillable=False, page_fluid=True)
 
 with ui.sidebar(title="Filter controls"):
-    ui.input_selectize("var", "Select variable", choices=["MEDREIMB_IP", "MEDREIMB_OP"])
-
+    #ui.input_selectize("var", "Select variable", choices=["MEDREIMB_IP", "MEDREIMB_OP"])
+    ui.input_selectize("County", "Select county", choices=COUNTIES)
+    ui.input_selectize("Race", "Select race", choices=RACES)
+    ui.input_selectize("Sex", "Select sex", choices=SEXES)
 
 # with ui.layout_column_wrap(fill=False):
 #     with ui.value_box(showcase=icon_svg("earlybirds")):
@@ -44,10 +47,10 @@ with ui.layout_columns():
         @render_widget
         def county_bar():
 
-            sorted = nj_counties.sort_values(input.var(), ascending=True)
+            sorted = nj_counties.sort_values("MEDREIMB_IP", ascending=True)
 
             county_bar = px.bar(
-                sorted, x=input.var(), y="COUNTY_LAB", orientation="h"
+                sorted, x="MEDREIMB_IP", y="COUNTY_LAB", orientation="h"
             )
 
             return county_bar
