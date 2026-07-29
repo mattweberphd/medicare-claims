@@ -11,3 +11,4 @@ default:
     - SP_OSTEOPRS
     - SP_RA_OA
     - SP_STRKETIA
+    FILTER_ALL: "(All)"
