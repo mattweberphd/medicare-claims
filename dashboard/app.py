@@ -11,9 +11,9 @@ from shared import nj_counties, nj_counties_json, reimb_amt_ip, reimb_amt_ip_by_
 
 ui.page_opts(title="DeSynPUF dashboard", fillable=False, page_fluid=True)
 
-# Filtering function
+# Filtering functions
 @reactive.calc
-def f_counties() -> pd.DataFrame:
+def f_reimbursement() -> pd.DataFrame:
 
     filtered = payment.reset_index()
 
@@ -38,7 +38,7 @@ with ui.layout_columns():
         @render_widget
         def county_bar():
 
-            fdf = f_counties()
+            fdf = f_reimbursement()
             sorted = fdf.sort_values("MEDREIMB_IP", ascending=True)
 
             county_bar = px.bar(
@@ -51,8 +51,11 @@ with ui.layout_columns():
         ui.card_header("Map of reimbursement")
         @render_widget
         def county_map():
+
+            fdf = f_reimbursement()
+
             fig = px.choropleth(
-                reimb_amt_ip,
+                fdf,
                 geojson=nj_counties_json, 
                 locations='County Name',
                 featureidkey="properties.COUNTY_LABEL", 
