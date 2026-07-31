@@ -12,19 +12,34 @@ from shared import nj_counties, nj_counties_json, reimb_amt_ip, reimb_amt_ip_by_
 ui.page_opts(title="DeSynPUF dashboard", fillable=False, page_fluid=True)
 
 # Filtering functions
-@reactive.calc
-def f_reimbursement() -> pd.DataFrame:
+def f_reimbursement(aggregate_by: str) -> pd.DataFrame:
 
     filtered = payment.reset_index()
 
-    if input.Race() != FILTER_ALL:
+    if (input.County() != FILTER_ALL) & (aggregate_by != "County Name"):
+        filtered = filtered[filtered["County Name"] == input.County()]
+    if (input.Race() != FILTER_ALL) & (aggregate_by != "Race/Ethnicity"):
        filtered = filtered[filtered["Race/Ethnicity"] == input.Race()]
-    if input.Sex() != FILTER_ALL:
+    if (input.Sex() != FILTER_ALL) & (aggregate_by != "Sex"):
        filtered = filtered[filtered["Sex"] == input.Sex()]
 
-    aggregated = filtered.groupby("County Name")[payment_fields].sum().reset_index()
+    aggregated = filtered.groupby(aggregate_by)[payment_fields].sum().reset_index()
 
     return aggregated
+
+@reactive.calc
+def f_reimbursement_county() -> pd.DataFrame:
+
+    return f_reimbursement("County Name")
+
+def f_reimbursement_race() -> pd.DataFrame:
+
+    return f_reimbursement("Race/Ethnicity")
+
+def f_reimbursement_sex() -> pd.DataFrame:
+
+    return f_reimbursement("Sex")
+
 
 with ui.sidebar(title="Filter controls"):
     ui.input_selectize("County", "Select county", choices=COUNTIES)
@@ -38,7 +53,7 @@ with ui.layout_columns():
         @render_widget
         def county_bar():
 
-            fdf = f_reimbursement()
+            fdf = f_reimbursement_county()
             sorted = fdf.sort_values("MEDREIMB_IP", ascending=True)
 
             county_bar = px.bar(
@@ -52,7 +67,7 @@ with ui.layout_columns():
         @render_widget
         def county_map():
 
-            fdf = f_reimbursement()
+            fdf = f_reimbursement_county()
 
             fig = px.choropleth(
                 fdf,
@@ -61,7 +76,6 @@ with ui.layout_columns():
                 featureidkey="properties.COUNTY_LABEL", 
                 color='MEDREIMB_IP',
                 color_continuous_scale="Viridis",
-                #range_color=(0, 12),
                 scope="usa",
                 labels={'MEDREIMB_IP':'Total inpatient reimbursement'}
             )
@@ -76,10 +90,11 @@ with ui.layout_columns():
         @render_widget
         def race_bar():
 
-            sorted = reimb_amt_ip_by_race.sort_values(input.var(), ascending=True)
+            fdf = f_reimbursement_race()
+            sorted = fdf.sort_values("MEDREIMB_IP", ascending=True)
 
             race_bar = px.bar(
-                sorted, x=input.var(), y="Race/Ethnicity", orientation="h"
+                sorted, x="MEDREIMB_IP", y="Race/Ethnicity", orientation="h"
             )
             
             return race_bar
@@ -89,10 +104,11 @@ with ui.layout_columns():
         @render_widget
         def sex_bar():
 
-            sorted = reimb_amt_ip_by_sex.sort_values(input.var(), ascending=True)
+            fdf = f_reimbursement_sex()
+            sorted = fdf.sort_values("MEDREIMB_IP", ascending=True)
 
             sex_bar = px.bar(
-                sorted, x=input.var(), y="Sex", orientation="h"
+                sorted, x="MEDREIMB_IP", y="Sex", orientation="h"
             )
             
             return sex_bar            
