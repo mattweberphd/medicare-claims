@@ -7,27 +7,25 @@ from shinywidgets import render_widget
 
 # TODO: organize
 from shared import (
-    nj_counties,
-    nj_counties_json,
-    reimb_amt_ip,
-    reimb_amt_ip_by_race,
-    reimb_amt_ip_by_sex,
-    rxr,
-    create_responsibility_pie_df,
-    INDICATORS,
-    cooccurrence,
-    nj,
     COUNTIES,
+    FILTER_ALL,
+    INDICATORS,
     RACES,
     SEXES,
-    FILTER_ALL,
+    cooccurrence,
+    create_responsibility_pie_df,
+    nj_counties_json,
+    nj,
     payment,
     payment_fields,
+    rxr,
 )
 
 ui.page_opts(title="DeSynPUF dashboard", fillable=False, page_fluid=True)
 
 
+# Base filtering functions
+# Non-reactive -- parameterized by reactive functions
 # Filtering functions
 def f_reimbursement(aggregate_by: str) -> pd.DataFrame:
 
@@ -45,6 +43,41 @@ def f_reimbursement(aggregate_by: str) -> pd.DataFrame:
     return aggregated
 
 
+def f_responsibility(df: pd.DataFrame, care_type: str) -> pd.DataFrame:
+
+    filtered = df.reset_index()
+
+    if input.County() != FILTER_ALL:
+        filtered = filtered[filtered["County Name"] == input.County()]
+    if input.Race() != FILTER_ALL:
+        filtered = filtered[filtered["Race/Ethnicity"] == input.Race()]
+    if input.Sex() != FILTER_ALL:
+        filtered = filtered[filtered["Sex"] == input.Sex()]
+
+    pie_df = create_responsibility_pie_df(filtered, care_type)
+
+    return pie_df
+
+
+@reactive.calc
+def f_indicators():
+
+    cols = ["County Name", "Race/Ethnicity", "Sex"] + INDICATORS
+
+    filtered = nj[cols].replace({2: 0})
+
+    if input.County() != FILTER_ALL:
+        filtered = filtered[filtered["County Name"] == input.County()]
+    if input.Race() != FILTER_ALL:
+        filtered = filtered[filtered["Race/Ethnicity"] == input.Race()]
+    if input.Sex() != FILTER_ALL:
+        filtered = filtered[filtered["Sex"] == input.Sex()]
+
+    # removing the demographic cols now we're done filtering
+    return filtered[INDICATORS]
+
+
+# Reactive wrappers
 @reactive.calc
 def f_reimbursement_county() -> pd.DataFrame:
 
@@ -61,22 +94,6 @@ def f_reimbursement_race() -> pd.DataFrame:
 def f_reimbursement_sex() -> pd.DataFrame:
 
     return f_reimbursement("Sex")
-
-
-def f_responsibility(df: pd.DataFrame, care_type: str) -> pd.DataFrame:
-
-    filtered = df.reset_index()
-
-    if input.County() != FILTER_ALL:
-        filtered = filtered[filtered["County Name"] == input.County()]
-    if input.Race() != FILTER_ALL:
-        filtered = filtered[filtered["Race/Ethnicity"] == input.Race()]
-    if input.Sex() != FILTER_ALL:
-        filtered = filtered[filtered["Sex"] == input.Sex()]
-
-    pie_df = create_responsibility_pie_df(filtered, care_type)
-
-    return pie_df
 
 
 @reactive.calc
@@ -230,7 +247,7 @@ with ui.layout_columns():
         @render_widget
         def indicator_frequency():
             # oh jesus make this a function
-            indicators_bin = nj[INDICATORS].replace({2: 0})
+            indicators_bin = f_indicators()
             indicators_count = (
                 indicators_bin.sum()
                 .reset_index()
@@ -252,7 +269,8 @@ with ui.layout_columns():
         @render_widget
         def cooccurrence_raw():
 
-            indicators_bin = nj[INDICATORS].replace({2: 0})
+            # indicators_bin = nj[INDICATORS].replace({2: 0})
+            indicators_bin = f_indicators()
             coc = cooccurrence(indicators_bin)
             hm = px.imshow(coc)
 
@@ -266,7 +284,8 @@ with ui.layout_columns():
         def cooccurrence_rows():
 
             # TODO: move outside functions, since duplicated?
-            indicators_bin = nj[INDICATORS].replace({2: 0})
+            # indicators_bin = nj[INDICATORS].replace({2: 0})
+            indicators_bin = f_indicators()
             cocr = cooccurrence(
                 indicators_bin, columns=INDICATORS, convert_pct_by="rows"
             )

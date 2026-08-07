@@ -36,7 +36,7 @@ payment_fields = [
     "BENRES_CAR",
     "PPPYMT_IP",
     "PPPYMT_OP",
-    "PPPYMT_CAR"
+    "PPPYMT_CAR",
 ]
 responsibility = {
     "MEDREIMB_IP": "Medicare",
@@ -47,7 +47,7 @@ responsibility = {
     "BENRES_CAR": "Beneficiary",
     "PPPYMT_IP": "Payer",
     "PPPYMT_OP": "Payer",
-    "PPPYMT_CAR": "Payer"
+    "PPPYMT_CAR": "Payer",
 }
 care = {
     "MEDREIMB_IP": "Inpatient",
@@ -58,7 +58,7 @@ care = {
     "BENRES_CAR": "Carrier",
     "PPPYMT_IP": "Inpatient",
     "PPPYMT_OP": "Outpatient",
-    "PPPYMT_CAR": "Carrier"    
+    "PPPYMT_CAR": "Carrier",
 }
 
 nj = (
@@ -89,13 +89,32 @@ nj_counties = nj_counties.join(reimb_amt_ip, on="COUNTY_LAB").join(
 )
 
 # this isn't great, do the processing once
-reimb_amt_ip = nj.groupby("County Name")["MEDREIMB_IP"].sum().to_frame(name="MEDREIMB_IP").reset_index()
-reimb_amt_op = nj.groupby("County Name")["MEDREIMB_OP"].sum().to_frame(name="MEDREIMB_OP").reset_index()
+reimb_amt_ip = (
+    nj.groupby("County Name")["MEDREIMB_IP"]
+    .sum()
+    .to_frame(name="MEDREIMB_IP")
+    .reset_index()
+)
+reimb_amt_op = (
+    nj.groupby("County Name")["MEDREIMB_OP"]
+    .sum()
+    .to_frame(name="MEDREIMB_OP")
+    .reset_index()
+)
 
-nj_counties_json = json.load(open("../data/NJ_Counties_3857_3761882870795826402.geojson", "r"))
+nj_counties_json = json.load(
+    open("../data/NJ_Counties_3857_3761882870795826402.geojson", "r")
+)
 
-reimb_amt_ip_by_race = nj.groupby("Race/Ethnicity")["MEDREIMB_IP"].sum().to_frame(name="MEDREIMB_IP").reset_index()
-reimb_amt_ip_by_sex = nj.groupby("Sex")["MEDREIMB_IP"].sum().to_frame(name="MEDREIMB_IP").reset_index()
+reimb_amt_ip_by_race = (
+    nj.groupby("Race/Ethnicity")["MEDREIMB_IP"]
+    .sum()
+    .to_frame(name="MEDREIMB_IP")
+    .reset_index()
+)
+reimb_amt_ip_by_sex = (
+    nj.groupby("Sex")["MEDREIMB_IP"].sum().to_frame(name="MEDREIMB_IP").reset_index()
+)
 
 # Reimbursement by responsibility (Medicare reimbursement, beneficiary, payer) and type of care
 # (inpatient, outpatient, carrier (?))
@@ -106,27 +125,31 @@ reimb_amt_ip_by_sex = nj.groupby("Sex")["MEDREIMB_IP"].sum().to_frame(name="MEDR
 # Sum fields
 rxr = nj.groupby(groups)[payment_fields].sum().reset_index()
 # Wide to long
-rxr = pd.melt(rxr, id_vars = groups)
+rxr = pd.melt(rxr, id_vars=groups)
 
 rxr["Responsibility"] = rxr["variable"].map(responsibility)
 rxr["Care Type"] = rxr["variable"].map(care)
 rxr = rxr.rename(columns={"value": "Amount"})
 
+
 def create_responsibility_pie_df(df: pd.DataFrame, care_type: str) -> pd.DataFrame:
 
     df_ = df[df["Care Type"] == care_type]
-    df_ = df_[["Responsibility", "Care Type", "Amount"]]\
-            .groupby(["Responsibility", "Care Type"])\
-            .sum()\
-            .reset_index()
+    df_ = (
+        df_[["Responsibility", "Care Type", "Amount"]]
+        .groupby(["Responsibility", "Care Type"])
+        .sum()
+        .reset_index()
+    )
     df_["Pct"] = df_["Amount"] / df_["Amount"].sum()
 
     return df_
 
+
 def cooccurrence(
-    df: pd.DataFrame, 
-    columns: Optional[list[str]] = None, 
-    convert_pct_by: Optional[str] = None
+    df: pd.DataFrame,
+    columns: Optional[list[str]] = None,
+    convert_pct_by: Optional[str] = None,
 ) -> pd.DataFrame:
 
     cooccurrence = df[columns].T.dot(df[columns]) if columns else df.T.dot(df)
@@ -140,4 +163,5 @@ def cooccurrence(
 
     return cooccurrence
 
-#import pdb; pdb.set_trace()
+
+# import pdb; pdb.set_trace()
