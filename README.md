@@ -5,7 +5,7 @@ This repository visualizes the synthetic Medicare claims data provided by [the C
 Data should go in a directory called "data" on the top level. The dashboard also relies on the [County Boundaries of New Jersey shapefile hosted by NJGIN](https://njogis-newjersey.opendata.arcgis.com/datasets/newjersey::county-boundaries-of-nj-hosted-3857/explore), which goes in the same folder.
 
 ## TODO
-* Figure out and implement filtering (e.g., by demographics and geography -- I think by variable is not necessary, show everything?)
+* ~Figure out and implement filtering (e.g., by demographics and geography -- I think by variable is not necessary, show everything?)~
     * ... no, you should allow users to select responsibility and/or care type.
 * Histograms of reimbursement per person
 * Better styling
