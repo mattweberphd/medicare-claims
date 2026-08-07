@@ -1,3 +1,4 @@
+import pandas as pd
 import plotly.express as px
 
 from shiny import reactive
@@ -32,13 +33,32 @@ def f_reimbursement_county() -> pd.DataFrame:
 
     return f_reimbursement("County Name")
 
+@reactive.calc
 def f_reimbursement_race() -> pd.DataFrame:
 
     return f_reimbursement("Race/Ethnicity")
 
+@reactive.calc
 def f_reimbursement_sex() -> pd.DataFrame:
 
     return f_reimbursement("Sex")
+
+
+@reactive.calc
+def f_responsibility_ip() -> pd.DataFrame:
+
+    filtered = rxr.reset_index()
+
+    if (input.County() != FILTER_ALL):
+        filtered = filtered[filtered["County Name"] == input.County()]
+    if (input.Race() != FILTER_ALL):
+       filtered = filtered[filtered["Race/Ethnicity"] == input.Race()]
+    if (input.Sex() != FILTER_ALL):
+       filtered = filtered[filtered["Sex"] == input.Sex()]
+
+    pie_df = create_responsibility_pie_df(filtered, "Inpatient")
+
+    return pie_df
 
 
 with ui.sidebar(title="Filter controls"):
@@ -46,7 +66,9 @@ with ui.sidebar(title="Filter controls"):
     ui.input_selectize("Race", "Select race", choices=RACES)
     ui.input_selectize("Sex", "Select sex", choices=SEXES)
 
+# Row 1
 with ui.layout_columns():
+    # Reimbursement graph
     with ui.card(full_screen=True):
         ui.card_header("Reimbursement amounts")
 
@@ -62,6 +84,7 @@ with ui.layout_columns():
 
             return county_bar
 
+    # Reimbursement map
     with ui.card(full_screen=True):
         ui.card_header("Map of reimbursement")
         @render_widget
@@ -84,7 +107,9 @@ with ui.layout_columns():
 
             return fig
 
+# Row 2
 with ui.layout_columns():
+    # Reimbursement by race
     with ui.card(full_screen=True):
         ui.card_header("Reimbursement by race")
         @render_widget
@@ -99,6 +124,7 @@ with ui.layout_columns():
             
             return race_bar
 
+    # Reimbursement by sex
     with ui.card(full_screen=True):
         ui.card_header("Reimbursement by sex")
         @render_widget
@@ -113,19 +139,23 @@ with ui.layout_columns():
             
             return sex_bar            
 
-
+# Row 3
 with ui.layout_columns():
+    # Inpatient cost pie
     with ui.card(full_screen=True):
         ui.card_header("Responsibility by inpatient cost")
 
-        ip = create_responsibility_pie_df(rxr, "Inpatient")
-
         @render_widget
         def plot_ip_pie():
+
+            #ip = create_responsibility_pie_df(rxr, "Inpatient")
+            ip = f_responsibility_ip()
+
             ip_pie = px.pie(ip, names="Responsibility", values="Amount")
 
             return ip_pie
 
+    # Outpatient cost pie
     with ui.card(full_screen=True):
         ui.card_header("Responsibility by outpatient cost")
 
@@ -137,6 +167,7 @@ with ui.layout_columns():
 
             return op_pie
 
+    # Carrier cost pie
     with ui.card(full_screen=True):
         ui.card_header("Responsibility by carrier cost")
 
@@ -148,9 +179,10 @@ with ui.layout_columns():
 
             return car_pie            
 
-
+# Row 4
 with ui.layout_columns():
 
+    # Indicator frequency
     with ui.card(full_screen=True):
         ui.card_header("Frequency of indicators")
         @render_widget
@@ -167,6 +199,7 @@ with ui.layout_columns():
 
             return indicator_bar            
 
+    # Indicator cooccurrence (raw)
     with ui.card(full_screen=True):
         ui.card_header("Raw cooccurrence of indicators")
         @render_widget
@@ -178,6 +211,7 @@ with ui.layout_columns():
 
             return hm
 
+    # Indicator cooccurrence (col | row)
     with ui.card(full_screen=True):
         ui.card_header("Cooccurrence of indicators (col | row)")
         @render_widget
